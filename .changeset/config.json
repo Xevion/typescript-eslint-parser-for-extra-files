@@ -3,7 +3,7 @@
   "changelog": [
     "@changesets/changelog-github",
     {
-      "repo": "ota-meshi/typescript-eslint-parser-for-extra-files"
+      "repo": "Xevion/typescript-eslint-parser-for-extra-files"
     }
   ],
   "commit": false,

@@ -2,7 +2,7 @@ import assert from "assert";
 import * as parser from "../../src";
 import { version } from "../../package.json";
 const expectedMeta = {
-  name: "typescript-eslint-parser-for-extra-files",
+  name: "@xevion/ts-eslint-extra",
   version,
 };
 

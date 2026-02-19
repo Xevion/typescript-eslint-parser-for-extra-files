@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   stale:
-    if: github.repository == 'ota-meshi/typescript-eslint-parser-for-extra-files'
+    if: github.repository == 'Xevion/typescript-eslint-parser-for-extra-files'
     name: Close stale issues with missing information
     runs-on: ubuntu-latest
     steps:

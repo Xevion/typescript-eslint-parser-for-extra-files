@@ -32,11 +32,11 @@ body:
     validations:
       required: true
   - type: textarea
-    id: typescript-eslint-parser-for-extra-files-version
+    id: ts-eslint-extra-version
     attributes:
-      label: What version of `typescript-eslint-parser-for-extra-files` are you using?
+      label: What version of `@xevion/ts-eslint-extra` are you using?
       value: |
-        - typescript-eslint-parser-for-extra-files@0.0.0
+        - @xevion/ts-eslint-extra@0.0.0
     validations:
       required: true
   - type: textarea

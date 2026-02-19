@@ -1,10 +1,8 @@
-# typescript-eslint-parser-for-extra-files
+# @xevion/ts-eslint-extra
 
-An experimental ESLint custom parser for Vue, Svelte, and Astro for use with TypeScript. It provides type information in combination with each framework's ESLint custom parser.
+Fork of [typescript-eslint-parser-for-extra-files](https://github.com/ota-meshi/typescript-eslint-parser-for-extra-files) with fixes for named export resolution from `.svelte` files.
 
-This parser is in the ***experimental stages*** of development.
-
-[![sponsors](https://img.shields.io/badge/-Sponsor-fafbfc?logo=GitHub%20Sponsors)](https://github.com/sponsors/ota-meshi)
+An ESLint custom parser for Vue, Svelte, and Astro for use with TypeScript. It provides type information in combination with each framework's ESLint custom parser.
 
 ## ❓ What is this parser?
 
@@ -16,14 +14,14 @@ e.g.
 
 ```vue
 <script lang="ts">
-import HelloWorld from './components/HelloWorld.vue' // <- typescript program can't parse it. because it will read including template and style.
+import HelloWorld from "./components/HelloWorld.vue"; // <- typescript program can't parse it. because it will read including template and style.
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    HelloWorld // <- so type information is `any`
-  }
-}
+    HelloWorld, // <- so type information is `any`
+  },
+};
 </script>
 ```
 
@@ -40,7 +38,7 @@ This parser is used in combination with [vue-eslint-parser], [svelte-eslint-pars
 ## 💿 Installation
 
 ```bash
-npm install --save-dev typescript-eslint-parser-for-extra-files @typescript-eslint/parser@latest typescript@latest
+npm install --save-dev @xevion/ts-eslint-extra @typescript-eslint/parser@latest typescript@latest
 ```
 
 ### With Vue
@@ -70,26 +68,29 @@ npm install --save-dev astrojs-compiler-sync@latest @astrojs/compiler
 ## 📖 Usage
 
 1. Change the `include` in your `tsconfig.json` to include the component files (`*.vue`, `*.svelte`, and `*.astro`).
+
 ```jsonc
 {
   "include": [
-    "**/*.vue",    // with Vue
+    "**/*.vue", // with Vue
     "**/*.svelte", // with Svelte
-    "**/*.astro",  // with Astro
+    "**/*.astro", // with Astro
     "**/*.ts",
-    "**/*.tsx"
-  ]
+    "**/*.tsx",
+  ],
 }
 ```
 
 2. Write `overrides.parserOptions.parser` option in your `.eslintrc.cjs` file.
+
 ### With Vue
+
 ```js
 {
     "overrides": [
         {
             "files": ["*.ts", "*.tsx"],
-            "parser": "typescript-eslint-parser-for-extra-files",
+            "parser": "@xevion/ts-eslint-extra",
             "parserOptions": {
                 "project": "./tsconfig.json"
             },
@@ -98,10 +99,10 @@ npm install --save-dev astrojs-compiler-sync@latest @astrojs/compiler
             "files": ["*.vue"],
             "parser": "vue-eslint-parser",
             "parserOptions": {
-                "parser": "typescript-eslint-parser-for-extra-files",
+                "parser": "@xevion/ts-eslint-extra",
                 // Or
                 // "parser": {
-                //     "ts": require("typescript-eslint-parser-for-extra-files")
+                //     "ts": require("@xevion/ts-eslint-extra")
                 // }
                 "project": "./tsconfig.json"
             },
@@ -111,12 +112,13 @@ npm install --save-dev astrojs-compiler-sync@latest @astrojs/compiler
 ```
 
 ### With Svelte
+
 ```js
 {
     "overrides": [
         {
             "files": ["*.ts", "*.tsx"],
-            "parser": "typescript-eslint-parser-for-extra-files",
+            "parser": "@xevion/ts-eslint-extra",
             "parserOptions": {
                 "project": "./tsconfig.json"
             },
@@ -125,10 +127,10 @@ npm install --save-dev astrojs-compiler-sync@latest @astrojs/compiler
             "files": ["*.svelte"],
             "parser": "svelte-eslint-parser",
             "parserOptions": {
-                "parser": "typescript-eslint-parser-for-extra-files",
+                "parser": "@xevion/ts-eslint-extra",
                 // Or
                 // "parser": {
-                //     "ts": require("typescript-eslint-parser-for-extra-files")
+                //     "ts": require("@xevion/ts-eslint-extra")
                 // }
                 "project": "./tsconfig.json"
             },
@@ -138,12 +140,13 @@ npm install --save-dev astrojs-compiler-sync@latest @astrojs/compiler
 ```
 
 ### With Astro
+
 ```js
 {
     "overrides": [
         {
             "files": ["*.ts", "*.tsx"],
-            "parser": "typescript-eslint-parser-for-extra-files",
+            "parser": "@xevion/ts-eslint-extra",
             "parserOptions": {
                 "project": "./tsconfig.json"
             },
@@ -152,7 +155,7 @@ npm install --save-dev astrojs-compiler-sync@latest @astrojs/compiler
             "files": ["*.astro"],
             "parser": "astro-eslint-parser",
             "parserOptions": {
-                "parser": "typescript-eslint-parser-for-extra-files",
+                "parser": "@xevion/ts-eslint-extra",
                 "project": "./tsconfig.json"
             },
         }
