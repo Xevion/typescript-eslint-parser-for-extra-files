@@ -41,7 +41,7 @@
     "typescript"
   ],
   "scripts": {
-    "build": "tsdown",
+    "build": "tsdown --no-dts && tsc --project tsconfig.build.json && cp lib/index.d.ts lib/index.d.cts",
     "clean": "rimraf .nyc_output lib coverage",
     "cover": "nyc --reporter=lcov yarn test",
     "debug": "yarn mocha \"tests/src/**/*.ts\" --reporter dot --timeout 60000",

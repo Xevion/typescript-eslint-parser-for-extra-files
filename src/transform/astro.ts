@@ -11,6 +11,7 @@ export function transformForAstro(
   // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires -- ignore
   const compiler: typeof compilerSync = require("astrojs-compiler-sync");
   const result = compiler.convertToTSX(code, {
+    // @ts-expect-error -- sourcefile exists at runtime but not in installed type defs
     sourcefile: context.filePath,
   });
 

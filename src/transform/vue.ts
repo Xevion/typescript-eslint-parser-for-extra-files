@@ -12,6 +12,7 @@ export function transformForVue(
   const result = compiler.parse(code);
   const compiled = compiler.compileScript(result.descriptor, {
     id: "id",
+    // @ts-expect-error -- reactivityTransform exists at runtime but not in installed type defs
     reactivityTransform: true,
   });
 
