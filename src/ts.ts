@@ -172,7 +172,7 @@ export class TSService {
         };
         host.getSourceFileByPath = (
           fileName,
-          path,
+          filePath,
           languageVersionOrOptions,
           ...args
         ) => {
@@ -180,7 +180,7 @@ export class TSService {
           const originalSourceFile = original.getSourceFileByPath.call(
             host,
             fileName,
-            path,
+            filePath,
             languageVersionOrOptions,
             ...args,
           );
@@ -188,6 +188,119 @@ export class TSService {
             getTargetSourceFile(fileName, languageVersionOrOptions) ??
             originalSourceFile
           );
+        };
+
+        // Patch module resolution on the CompilerHost (NOT the
+        // WatchCompilerHost) so that imports of extra-extension files
+        // resolve to actual source files instead of ambient wildcard
+        // declarations like `declare module '*.svelte'`.
+        //
+        // Placing this on the CompilerHost preserves the WatchProgram's
+        // incremental module resolution cache — only the builder program
+        // uses this custom resolution, avoiding the severe performance
+        // penalty of overriding WatchCompilerHost.resolveModuleNameLiterals.
+        const extraSys: ts.System = {
+          ...ts.sys,
+          fileExists(fp: string) {
+            if (ts.sys.fileExists(fp)) return true;
+            for (const ext of extraFileExtensions) {
+              const dtsPattern = `.d${ext}.ts`;
+              if (fp.endsWith(dtsPattern)) {
+                const realPath = fp.slice(0, -dtsPattern.length) + ext;
+                if (ts.sys.fileExists(realPath)) return true;
+              }
+            }
+            return false;
+          },
+          readFile(fp: string, encoding?: string) {
+            return ts.sys.readFile(fp, encoding);
+          },
+        };
+        if (ts.sys.realpath) {
+          extraSys.realpath = (fp: string) => {
+            for (const ext of extraFileExtensions) {
+              const dtsPattern = `.d${ext}.ts`;
+              if (fp.endsWith(dtsPattern)) {
+                const realPath = fp.slice(0, -dtsPattern.length) + ext;
+                if (ts.sys.fileExists(realPath)) {
+                  return ts.sys.realpath!(realPath);
+                }
+              }
+            }
+            return ts.sys.realpath!(fp);
+          };
+        }
+
+        const moduleResolutionCache = ts.createModuleResolutionCache(
+          ts.sys.getCurrentDirectory(),
+          (s) => (ts.sys.useCaseSensitiveFileNames ? s : s.toLowerCase()),
+          options ?? {},
+        );
+        const extraModuleResolutionCache = ts.createModuleResolutionCache(
+          ts.sys.getCurrentDirectory(),
+          (s) => (ts.sys.useCaseSensitiveFileNames ? s : s.toLowerCase()),
+          options ?? {},
+        );
+
+        host.resolveModuleNameLiterals = (
+          moduleLiterals,
+          containingFile,
+          redirectedReference,
+          compilerOptions,
+        ) => {
+          return moduleLiterals.map((literal) => {
+            const moduleName = literal.text;
+
+            // Standard resolution first (with cache).
+            const standardResult = ts.resolveModuleName(
+              moduleName,
+              containingFile,
+              compilerOptions,
+              ts.sys,
+              moduleResolutionCache,
+              redirectedReference,
+            );
+            if (standardResult.resolvedModule) {
+              return standardResult;
+            }
+
+            // Only try custom resolution for extra-extension imports.
+            if (!isExtra(moduleName, extraFileExtensions)) {
+              return standardResult;
+            }
+
+            // Custom resolution: map `.d.EXT.ts` → `.EXT` to let
+            // TypeScript's resolver find the actual source file.
+            const extraResult = ts.resolveModuleName(
+              moduleName,
+              containingFile,
+              compilerOptions,
+              extraSys,
+              extraModuleResolutionCache,
+            );
+            if (extraResult.resolvedModule) {
+              let resolvedFileName =
+                extraResult.resolvedModule.resolvedFileName;
+              for (const ext of extraFileExtensions) {
+                const dtsPattern = `.d${ext}.ts`;
+                if (resolvedFileName.endsWith(dtsPattern)) {
+                  resolvedFileName =
+                    resolvedFileName.slice(0, -dtsPattern.length) + ext;
+                  break;
+                }
+              }
+              return {
+                resolvedModule: {
+                  resolvedFileName,
+                  extension: ts.Extension.Ts,
+                  isExternalLibraryImport:
+                    extraResult.resolvedModule.isExternalLibraryImport,
+                },
+              };
+            }
+
+            return standardResult;
+          });
         };
       }
       return ts.createAbstractBuilder(
